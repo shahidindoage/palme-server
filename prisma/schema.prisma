@@ -1,0 +1,88 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    Int           @id @default(autoincrement())
+  name                  String
+  email                 String        @unique
+  password              String
+  phone                 String?
+  gender                String?
+  pushToken             String?
+  role                  String        @default("user") // user, admin, therapist, driver
+  appointments          Appointment[] @relation("UserAppointments")
+  preferredTherapistAppointments Appointment[] @relation("PreferredTherapist")
+  therapistAppointments Appointment[] @relation("TherapistAppointments")
+  driverAppointments    Appointment[] @relation("DriverAppointments")
+  notifications         Notification[]
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  image       String
+  description String
+  services    Service[]
+}
+
+model Service {
+  id             String        @id @default(uuid())
+  name           String
+  price          Float
+  duration       String
+  description    String
+  image          String
+  durations      Json?
+  availableSlots Json?
+  category       Category      @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  appointments   Appointment[]
+}
+
+model Appointment {
+  id               String   @id @default(uuid())
+  user             User     @relation("UserAppointments", fields: [userId], references: [id])
+  userId           Int
+  service          Service  @relation(fields: [serviceId], references: [id])
+  serviceId        String
+  
+  preferredTherapist User?    @relation("PreferredTherapist", fields: [preferredTherapistId], references: [id])
+  preferredTherapistId Int?
+
+  therapist        User?    @relation("TherapistAppointments", fields: [therapistId], references: [id])
+  therapistId      Int?
+  
+  driver           User?    @relation("DriverAppointments", fields: [driverId], references: [id])
+  driverId         Int?
+
+  date             String
+  time             String
+  datetime         String
+  selectedDuration String
+  selectedPrice    Float
+  status           String   @default("pending") // pending, booked, therapist_assigned, on_the_way, arrived, in_progress, completed, cancelled, paid
+  cancelledAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  body      String
+  data      Json?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

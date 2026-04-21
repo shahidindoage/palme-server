@@ -1,0 +1,89 @@
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card p-4">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                    <i class="bi bi-people text-primary fs-3"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Total Users</div>
+                    <div class="h4 mb-0"><%= userCount %></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4">
+            <div class="d-flex align-items-center">
+                <div class="bg-success bg-opacity-10 p-3 rounded-3 me-3">
+                    <i class="bi bi-briefcase text-success fs-3"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Active Services</div>
+                    <div class="h4 mb-0"><%= serviceCount %></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4">
+            <div class="d-flex align-items-center">
+                <div class="bg-warning bg-opacity-10 p-3 rounded-3 me-3">
+                    <i class="bi bi-calendar-check text-warning fs-3"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Total Bookings</div>
+                    <div class="h4 mb-0"><%= appointmentCount %></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white p-4 border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Bookings</h5>
+        <a href="/admin/appointments" class="btn btn-sm btn-palme">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">User</th>
+                        <th>Service</th>
+                        <th>Date & Time</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% recentAppointments.forEach(apt => { %>
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <img src="https://ui-avatars.com/api/?name=<%= apt.user.name %>" class="rounded-circle me-3" width="32">
+                                <div>
+                                    <div class="fw-bold"><%= apt.user.name %></div>
+                                    <div class="text-muted small"><%= apt.user.email %></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><%= apt.service.name %></td>
+                        <td>
+                            <div><%= apt.date %></div>
+                            <div class="text-muted small"><%= apt.time %></div>
+                        </td>
+                        <td class="fw-bold">AED <%= apt.selectedPrice %></td>
+                        <td>
+                            <span class="status-badge bg-<%= apt.status === 'paid' ? 'success' : (apt.status === 'cancelled' ? 'danger' : 'warning') %> bg-opacity-10 text-<%= apt.status === 'paid' ? 'success' : (apt.status === 'cancelled' ? 'danger' : 'warning') %>">
+                                <%= apt.status.toUpperCase() %>
+                            </span>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

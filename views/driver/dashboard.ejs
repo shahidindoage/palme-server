@@ -1,0 +1,35 @@
+<h1 class="h3 mb-4">Assigned Trips</h1>
+
+<% if (trips.length === 0) { %>
+    <div class="alert alert-info">No trips assigned yet.</div>
+<% } %>
+
+<% trips.forEach(apt => { %>
+    <div class="card p-3">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-1">Transport for <%= apt.service.name %></h5>
+                <p class="text-muted small mb-0"><%= apt.date %> at <%= apt.time %></p>
+                <hr class="my-2">
+                <div class="small">
+                    <strong>Therapist:</strong> <%= apt.therapist ? apt.therapist.name : 'N/A' %><br>
+                    <strong>Destination:</strong> Customer Home
+                </div>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <div class="mb-2">
+                    <span class="badge bg-primary bg-opacity-10 text-primary p-2">Status: <%= apt.status.replace(/_/g, ' ').toUpperCase() %></span>
+                </div>
+                <form action="/driver/appointments/<%= apt.id %>/status" method="POST" class="d-flex gap-2 justify-content-md-end">
+                    <% if (apt.status === 'therapist_assigned' || apt.status === 'booked') { %>
+                        <input type="hidden" name="status" value="on_the_way">
+                        <button type="submit" class="btn btn-primary btn-status w-100">Start Journey</button>
+                    <% } else if (apt.status === 'on_the_way') { %>
+                        <input type="hidden" name="status" value="arrived">
+                        <button type="submit" class="btn btn-info btn-status w-100">Arrived at Destination</button>
+                    <% } %>
+                </form>
+            </div>
+        </div>
+    </div>
+<% }) %>

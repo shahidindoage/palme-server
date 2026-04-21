@@ -1,0 +1,143 @@
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Booking</th>
+                        <th>Customer</th>
+                        <th>Preference</th>
+                        <th>Staff Assigned</th>
+                        <th>Schedule</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% appointments.forEach(apt => { %>
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold"><%= apt.service.name %></div>
+                            <div class="text-muted small">#<%= apt.id.substring(0,8) %></div>
+                        </td>
+                        <td>
+                            <div class="fw-bold"><%= apt.user.name %></div>
+                            <div class="text-muted small">AED <%= apt.selectedPrice %></div>
+                        </td>
+                        <td>
+                            <% if (apt.preferredTherapist) { %>
+                                <span class="badge bg-soft-primary text-primary" style="background-color: #e0e7ff; color: #4338ca;">
+                                    <i class="bi bi-heart-fill me-1"></i> <%= apt.preferredTherapist.name %>
+                                </span>
+                            <% } else { %>
+                                <span class="text-muted small">No Preference</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <% if (apt.therapist) { %>
+                                <div class="small fw-bold text-sage-green" style="color: #4A6741;"><i class="bi bi-person-heart"></i> <%= apt.therapist.name %></div>
+                            <% } %>
+                            <% if (apt.driver) { %>
+                                <div class="small text-primary"><i class="bi bi-car-front"></i> <%= apt.driver.name %></div>
+                            <% } %>
+                            <% if (!apt.therapist && !apt.driver) { %>
+                                <span class="badge bg-light text-muted border">Unassigned</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <div class="fw-bold small"><%= apt.date %></div>
+                            <div class="text-muted x-small"><%= apt.time %></div>
+                        </td>
+                        <td>
+                            <% 
+                                let badgeClass = 'warning';
+                                if(apt.status === 'paid' || apt.status === 'completed') badgeClass = 'success';
+                                if(apt.status === 'cancelled') badgeClass = 'danger';
+                                if(apt.status === 'booked' || apt.status === 'therapist_assigned') badgeClass = 'info';
+                                if(apt.status === 'on_the_way' || apt.status === 'in_progress') badgeClass = 'primary';
+                            %>
+                            <span class="status-badge bg-<%= badgeClass %> bg-opacity-10 text-<%= badgeClass %>">
+                                <%= apt.status.replace(/_/g, ' ').toUpperCase() %>
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light border" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#assignModal<%= apt.id %>">
+                                            <i class="bi bi-person-plus me-2"></i> Assign Staff
+                                        </button>
+                                    </li>
+                                    <% if (apt.status === 'pending' || apt.status === 'paid') { %>
+                                    <li>
+                                        <form action="/admin/appointments/<%= apt.id %>/confirm" method="POST">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-check2-circle me-2 text-success"></i>
+                                                Confirm Booking
+                                                <% if (apt.status === 'paid') { %>
+                                                  <span class="badge bg-success bg-opacity-10 text-success ms-1" style="font-size:10px;">PAID</span>
+                                                <% } %>
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <% } %>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form action="/admin/appointments/<%= apt.id %>/cancel" method="POST" onsubmit="return confirm('Cancel?')">
+                                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-x-circle me-2"></i> Cancel</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Assign Staff Modal -->
+                    <div class="modal fade" id="assignModal<%= apt.id %>" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form action="/admin/appointments/<%= apt.id %>/assign" method="POST">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Assign Staff to Booking #<%= apt.id.substring(0,8) %></h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Select Therapist</label>
+                                            <select name="therapistId" class="form-select">
+                                                <option value="">-- Choose Therapist --</option>
+                                                <% therapists.forEach(t => { %>
+                                                    <option value="<%= t.id %>" <%= apt.therapistId === t.id ? 'selected' : (apt.preferredTherapistId === t.id ? 'selected' : '') %>><%= t.name %></option>
+                                                <% }) %>
+                                            </select>
+                                            <% if (apt.preferredTherapist) { %>
+                                                <div class="form-text text-primary small">Customer requested: <strong><%= apt.preferredTherapist.name %></strong></div>
+                                            <% } %>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Select Driver</label>
+                                            <select name="driverId" class="form-select">
+                                                <option value="">-- Choose Driver --</option>
+                                                <% drivers.forEach(d => { %>
+                                                    <option value="<%= d.id %>" <%= apt.driverId === d.id ? 'selected' : '' %>><%= d.name %></option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-palme">Confirm Assignments</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
