@@ -54,6 +54,10 @@ app.get('/', (req, res) => {
   res.redirect('/admin');
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
