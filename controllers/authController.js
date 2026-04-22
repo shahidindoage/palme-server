@@ -29,10 +29,13 @@ exports.register = async (req, res) => {
         gender,
       },
       select: {
-        id: true,
-        name: true,
-        email: true,
-      },
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  gender: true,
+  role: true,  // ← ADD THIS
+},
     });
 
     // Generate JWT
